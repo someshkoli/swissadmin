@@ -9,32 +9,6 @@ import paramiko
 import subprocess
 import re
 # Create your views here.
-
-@csrf_exempt 
-def index(request):
-    data=json.load(request)
-    print(data["ip"])
-    k=online(request,data["ip"])
-    pc=ssh("192.168.43.46","aryan","a12345")
-    pc.connect()
-    j=pc.free(request)
-    print(j)
-    return HttpResponse(k)
-@csrf_exempt 
-def ram(request):
-    data=json.load(request)
-    print(data["ip"])
-    pc=ssh(data["ip"],"aryan","a12345")
-    pc.connect()
-    j=pc.free(request)
-    return HttpResponse(j)
-def sendmessage(request):
-    data=json.load(request)
-    print(data["ip"])
-    pc=ssh(data["ip"],"aryan","a12345")
-    pc.sendmessage(request["text"])
-    j=pc.free(request)
-    return HttpResponse(j)
 class ssh:
     def __init__(self,hostname1,username1,password1):
 	    self.ssh_output=None
@@ -66,9 +40,9 @@ class ssh:
             result_flag = True
  
         return result_flag
-    def ls(self,request):
+    def ls(self,request,path):
         "ls request for linux"
-        stdin,stdout,stderr=self.client.exec_command('ls',timeout=10)
+        stdin,stdout,stderr=self.client.exec_command('ls '+path,timeout=10)
         l=str(stdout.read())[2:].split("\\n")
         return JsonResponse({"files":l})
     def ps(self,request):
@@ -78,7 +52,7 @@ class ssh:
         out=str(stdout.read()).replace("\n"," \n ")
         return HttpResponse("hello")
     def free(self,request):
-        stdin,stdout,stderr=self.client.exec_command('free -h',timeout=10)
+        stdin,stdout,stderr=self.client.exec_command('free -h',timeout=1000)
         print(str(stdout))
         out=re.findall(r'\d.\dG',str(stdout.read()))
         print(out)
@@ -87,8 +61,41 @@ class ssh:
         
         return "hello"
     def sendmessage(self,text):
-        stdin,stdout,stderr=self.client.exec_command('zenity --warning --text "'+text+'"',timeout=10)
+        stdin,stdout,stderr=self.client.exec_command('zenity --warning --text "'+text+'" --display=:0',timeout=10)
         print(str(stdout))
+
+@csrf_exempt 
+def index(request):
+    data=json.load(request)
+    print(data["ip"])
+    k=online(request,data["ip"])
+    return HttpResponse(k)
+@csrf_exempt 
+def ram(request):
+    data=json.load(request)
+    print(data["ip"],data["username"],data["password"])
+    pc=ssh(data["ip"],data["username"],data["password"])
+    pc.connect()
+    j=pc.free(request)
+    return HttpResponse(j)
+@csrf_exempt 
+def sendmessage(request):
+    data=json.load(request)
+    print(data["ip"])
+    pc=ssh(data["ip"],data["username"],data["password"])
+    pc.connect()
+    print(data["text"])
+    pc.sendmessage(data["text"])
+    return HttpResponse(True)
+@csrf_exempt 
+def ls(request):
+    data=json.load(request)
+    print(data["ip"])
+    pc=ssh(data["ip"],data["username"],data["password"])
+    pc.connect()
+    print(data["text"])
+    k=pc.ls(request,data["text"])
+    return HttpResponse(k)
 
 def online(request,ip):
     
