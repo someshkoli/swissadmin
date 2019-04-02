@@ -1,0 +1,21 @@
+body {
+    /* background-color: #ECF0F1; */
+}
+
+.online {
+    font-weight: 700;
+    color: green;
+}
+
+.offline {
+    font-weight: 700;
+    color: red;
+}
+
+.main-table {
+    box-shadow:         13px 12px 0px 0px rgba(50, 50, 50, 0.18);
+}
+
+.ram-table {
+    box-shadow:         6px 6px 0px 0px rgba(50, 50, 50, 0.18);
+}
